@@ -1,0 +1,44 @@
+version: "3.3"
+
+name: gestione-richieste-permessi_backend
+
+services:
+  node:
+    restart: unless-stopped
+    build: ./docker/node
+    depends_on:
+      - "database"
+    env_file:
+      - .env
+    volumes:
+      - ./:/home/node/app
+    ports:
+      - "3001:3000"
+    command: "tail -f /dev/null"
+    networks:
+      - internal
+
+  database:
+    image: mysql:8
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+    ports:
+      - "3306:3306"
+    networks:
+      - internal
+    volumes:
+      - mysqldata:/var/lib/mysql/
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  mysqldata:
+    driver: local
